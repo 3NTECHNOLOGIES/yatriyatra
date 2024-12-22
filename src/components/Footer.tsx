@@ -78,7 +78,7 @@ function Footer() {
             </a>
           </p>
           <p className="text-gray-200 leading-relaxed">
-            <strong>Phone:</strong> +918191068288
+            <strong>Phone:</strong> +91 9910960325, +91 8191068288
           </p>
           <p className="text-gray-200 leading-relaxed">
             <strong>Location:</strong> Shop No. 09, First Floor, Global City

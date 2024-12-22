@@ -137,7 +137,7 @@ function ContactUs() {
           <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-6">
             <div className="flex items-center gap-4 text-gray-800">
               <FaPhoneAlt className="w-6 h-6 text-primary" />
-              <span className="text-lg">+918191068288</span>
+              <span className="text-lg">+91 9910960325, +91 8191068288</span>
             </div>
             <div className="flex items-center gap-4 text-gray-800">
               <FaEnvelope className="w-6 h-6 text-primary" />

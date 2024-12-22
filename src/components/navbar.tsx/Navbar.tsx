@@ -69,7 +69,7 @@ export default function Navbar() {
             <PiAirplaneTiltFill className="text-primary w-5 h-5" />
           </div>
           <span className="text-secondary text-[12px] italic">
-            Discover Amazing Places
+            Your Holidays Getaway Partner
           </span>
         </Link>
 

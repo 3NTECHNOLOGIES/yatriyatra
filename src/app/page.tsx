@@ -16,7 +16,7 @@ function Index() {
       <WhyChooseUs />
       <AboutUs />
       <FAQPage />
-      <FeaturedTours />
+      {/* <FeaturedTours /> */}
       <ContactUs />
       <Footer />
     </div>
