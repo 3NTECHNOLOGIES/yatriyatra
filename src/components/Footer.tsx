@@ -24,7 +24,7 @@ function Footer() {
           <ul className="space-y-3">
             <li>
               <Link
-                href="/"
+                href="#about-us"
                 className="text-gray-300 hover:text-primary transition duration-300"
               >
                 About Us
@@ -32,7 +32,7 @@ function Footer() {
             </li>
             <li>
               <Link
-                href="/"
+                href="#contact-us"
                 className="text-gray-300 hover:text-primary transition duration-300"
               >
                 Contact
@@ -81,7 +81,9 @@ function Footer() {
             <strong>Phone:</strong> +918191068288
           </p>
           <p className="text-gray-200 leading-relaxed">
-            <strong>Location:</strong> New York, USA
+            <strong>Location:</strong> Shop No. 09, First Floor, Global City
+            Centre-2, Above Dominos, Near Flora Avenue 33, Sector-33, Sohna
+            Road, Gurugram, Haryana-122103
           </p>
         </div>
       </div>

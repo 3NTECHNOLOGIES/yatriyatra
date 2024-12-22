@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import bannerImage from "@/assets/images/banner.jpg";
+import Link from "next/link";
 
 function Banner() {
   return (
@@ -31,12 +32,18 @@ function Banner() {
             world.
           </p>
           <div className="mt-6 flex gap-4 flex-wrap items-center justify-center">
-            <button className="bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-3 rounded-full shadow-lg transition-transform transform hover:scale-105">
+            <Link
+              href={"#contact-us"}
+              className="bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-3 rounded-full shadow-lg transition-transform transform hover:scale-105"
+            >
               Explore Now
-            </button>
-            <button className="bg-white text-gray-800 hover:bg-gray-200 font-semibold px-6 py-3 rounded-full shadow-lg transition-transform transform hover:scale-105">
+            </Link>
+            <Link
+              href={"/blog"}
+              className="bg-white text-gray-800 hover:bg-gray-200 font-semibold px-6 py-3 rounded-full shadow-lg transition-transform transform hover:scale-105"
+            >
               Learn More
-            </button>
+            </Link>
           </div>
         </div>
       </section>

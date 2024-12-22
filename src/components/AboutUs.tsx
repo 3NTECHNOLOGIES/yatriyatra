@@ -4,7 +4,10 @@ import aboutImage from "@/assets/images/banner.jpg"; // Replace with your actual
 
 function AboutUs() {
   return (
-    <section className="relative bg-gradient-to-r from-blue-100 to-indigo-200 py-20 px-6">
+    <section
+      className="relative bg-gradient-to-r from-blue-100 to-indigo-200 py-20 px-6"
+      id="about-us"
+    >
       <div className="container mx-auto gap-12 items-center">
         <div className="flex flex-col justify-center text-gray-800">
           <h2 className="text-4xl md:text-6xl font-extrabold text-center  text-gray-900 leading-tight mb-6">

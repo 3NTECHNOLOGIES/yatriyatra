@@ -1,11 +1,25 @@
-import React from "react";
-import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa"; // Importing React Icons
+"use client";
+
+import React, { useEffect, useRef } from "react";
+import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 import Image from "next/image";
-import contactImage from "@/assets/images/banner.jpg"; // Replace with your actual image path
+import contactImage from "@/assets/images/banner.jpg";
+import { useForm, ValidationError } from "@formspree/react";
+import { toast } from "react-toastify";
 
 function ContactUs() {
+  const [state, handleSubmit] = useForm("mqaazoqb");
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (state.succeeded) {
+      toast("Message sent successfully");
+      formRef.current?.reset();
+    }
+  }, [state.succeeded]);
+
   return (
-    <section className="py-16 px-6 bg-gray-100">
+    <section className="py-16 px-6 bg-gray-100 " id="contact-us">
       <div className="container mx-auto grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 items-center">
         {/* Left Section: Form */}
         <div className="flex flex-col space-y-8">
@@ -17,7 +31,7 @@ function ContactUs() {
             us and we'll get back to you soon.
           </p>
 
-          <form className="space-y-6" action="#" method="POST">
+          <form className="space-y-6" onSubmit={handleSubmit} ref={formRef}>
             <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label
@@ -31,7 +45,12 @@ function ContactUs() {
                   id="name"
                   name="name"
                   required
-                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-black"
+                />
+                <ValidationError
+                  prefix="Name"
+                  field="name"
+                  errors={state.errors}
                 />
               </div>
               <div>
@@ -46,9 +65,36 @@ function ContactUs() {
                   id="email"
                   name="email"
                   required
-                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-black"
+                />
+                <ValidationError
+                  prefix="Email"
+                  field="email"
+                  errors={state.errors}
                 />
               </div>
+            </div>
+
+            {/* Number */}
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Phone Number
+              </label>
+              <input
+                type="number"
+                id="number"
+                name="number"
+                required
+                className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-black"
+              />
+              <ValidationError
+                prefix="Number"
+                field="number"
+                errors={state.errors}
+              />
             </div>
 
             <div>
@@ -62,13 +108,19 @@ function ContactUs() {
                 id="message"
                 name="message"
                 required
-                className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-black"
               ></textarea>
+              <ValidationError
+                prefix="Message"
+                field="message"
+                errors={state.errors}
+              />
             </div>
 
             <div className="flex justify-center">
               <button
                 type="submit"
+                disabled={state.submitting}
                 className="bg-primary hover:bg-primary/80 text-white font-semibold px-8 py-3 rounded-full shadow-lg transition-transform transform hover:scale-105"
               >
                 Send Message
@@ -95,7 +147,11 @@ function ContactUs() {
           <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-6">
             <div className="flex items-center gap-4 text-gray-800">
               <FaMapMarkerAlt className="w-6 h-6 text-primary" />
-              <span className="text-lg">Your Address, City, Country</span>
+              <span className="text-lg">
+                Shop No. 09, First Floor, Global City Centre-2, Above Dominos,
+                Near Flora Avenue 33, Sector-33, Sohna Road,
+                Gurugram, Haryana-122103
+              </span>
             </div>
           </div>
 
