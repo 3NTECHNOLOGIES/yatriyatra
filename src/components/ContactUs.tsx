@@ -178,9 +178,11 @@ function ContactUs() {
         <div className="relative w-full h-72 rounded-xl shadow-lg overflow-hidden">
           <iframe
             className="w-full h-full"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14229.457915764038!2d77.1025!3d28.7041!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d0218a5c43adf%3A0x1b9be7a82e42b9!2sNew%20Delhi%2C%20Delhi%2C%20India!5e0!3m2!1sen!2sus!4v1686336711963!5m2!1sen!2sus"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3516.1054897161197!2d77.05583717512697!3d28.364902077366146!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d34e47d9d9389%3A0x5367c58e4a339ff5!2sFlora%20Avenue%2033%2C%209328%2B654%2C%20Sohna%20-%20Gurgaon%20Rd%2C%20Bhondsi%2C%20Haryana%20122103%2C%20India!5e0!3m2!1sen!2sus!4v1687645294092!5m2!1sen!2sus"
             loading="lazy"
           />
+
+          {/* https://maps.app.goo.gl/YP9xbzzJqfdERvG27 */}
         </div>
       </div>
     </section>
