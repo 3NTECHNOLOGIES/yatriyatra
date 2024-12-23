@@ -6,6 +6,7 @@ import Image from "next/image";
 import contactImage from "@/assets/images/banner.jpg";
 import { useForm, ValidationError } from "@formspree/react";
 import { toast } from "react-toastify";
+import { CgOrganisation } from "react-icons/cg";
 
 function ContactUs() {
   const [state, handleSubmit] = useForm("mqaazoqb");
@@ -132,14 +133,19 @@ function ContactUs() {
         <div className="p-6 md:p-12 bg-gray-100 flex flex-col justify-center space-y-6">
           <h3 className="text-2xl font-semibold text-gray-800">
             Our Contact Info
-            <p className="text-sm font-medium italic uppercase">
-              CLIQTAX TECHNOLOGIES PRIVATE LIMITED
-            </p>
+            <p className="text-sm font-medium italic uppercase"></p>
           </h3>
 
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-              <FaMapMarkerAlt className="text-primary w-6 h-6" />
+              <CgOrganisation className="text-primary w-6 h-6" />
+              <span className="text-gray-700 text-sm font-semibold">
+                CLIQTAX TECHNOLOGIES PRIVATE LIMITED
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <FaMapMarkerAlt className="text-primary w-8 h-8" />
               <span className="text-gray-700 text-sm">
                 Registered Address: The i-Thum, Tower -B, Office No. 1028, 10th
                 Floor, Plot No. A-40, Block -A, Sector-62, Gautam Buddha Nagar,
@@ -148,7 +154,7 @@ function ContactUs() {
             </div>
 
             <div className="flex items-center gap-4">
-              <FaMapMarkerAlt className="text-primary w-6 h-6" />
+              <FaMapMarkerAlt className="text-primary w-8 h-8" />
               <span className="text-gray-700 text-sm">
                 Delhi Branch Address: FIRST FLOOR, OFFICE NO 102, SHREE SHYAM
                 COMPLEX, VIKAS MARG, LAXMI NAGAR, East Delhi, Delhi, 110092
@@ -156,7 +162,7 @@ function ContactUs() {
             </div>
 
             <div className="flex items-center gap-4">
-              <FaMapMarkerAlt className="text-primary w-6 h-6" />
+              <FaMapMarkerAlt className="text-primary w-8 h-8" />
               <span className="text-gray-700 text-sm">
                 Haryana Branch Address: Shop No. 09, First Floor, Global City
                 Centre-2, Above Dominos, Near Flora Avenue 33, Sector-33, Sohna

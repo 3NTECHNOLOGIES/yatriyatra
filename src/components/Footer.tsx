@@ -69,7 +69,7 @@ function Footer() {
         <div>
           <div className="mb-4 space-y-1">
             <h3 className="text-2xl font-bold">Our Contact Info</h3>
-            <p className="text-[11px] font-medium italic uppercase">
+            <p className="text-lg font-bold uppercase">
               CLIQTAX TECHNOLOGIES PRIVATE LIMITED
             </p>
           </div>
