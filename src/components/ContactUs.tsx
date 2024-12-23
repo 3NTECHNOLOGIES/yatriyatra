@@ -26,9 +26,7 @@ function ContactUs() {
       <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Left Section: Form */}
         <div className="p-6 md:p-12 flex flex-col justify-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
-            Contact CLIQTAX TECHNOLOGIES PRIVATE LIMITED
-          </h2>
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Contact US</h2>
           <p className="text-gray-600 mb-6">
             We'd love to hear from you! Whether you have a question or just want
             to say hello, reach out to us, and we'll get back to you soon.
@@ -134,6 +132,9 @@ function ContactUs() {
         <div className="p-6 md:p-12 bg-gray-100 flex flex-col justify-center space-y-6">
           <h3 className="text-2xl font-semibold text-gray-800">
             Our Contact Info
+            <p className="text-sm font-medium italic uppercase">
+              CLIQTAX TECHNOLOGIES PRIVATE LIMITED
+            </p>
           </h3>
 
           <div className="space-y-4">

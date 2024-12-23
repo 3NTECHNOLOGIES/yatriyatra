@@ -67,7 +67,12 @@ function Footer() {
 
         {/* Contact Info Section */}
         <div>
-          <h3 className="text-2xl font-bold mb-4">Our Contact Info</h3>
+          <div className="mb-4 space-y-1">
+            <h3 className="text-2xl font-bold">Our Contact Info</h3>
+            <p className="text-[11px] font-medium italic uppercase">
+              CLIQTAX TECHNOLOGIES PRIVATE LIMITED
+            </p>
+          </div>
           <div className="space-y-6 text-gray-200">
             <div>
               <h4 className="font-semibold">Registered Address:</h4>
