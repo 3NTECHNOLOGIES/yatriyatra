@@ -4,9 +4,9 @@ import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
 
 function Footer() {
   return (
-    <footer className="bg-secondary text-white py-12 px-6 mt-1">
+    <footer className="bg-secondary text-white py-12 px-6">
       {/* Top Section */}
-      <div className="max-w-7xl mx-auto grid gap-8 md:grid-cols-3 text-center md:text-left">
+      <div className="max-w-7xl mx-auto grid gap-12 md:grid-cols-3 text-center md:text-left">
         {/* About Us Section */}
         <div>
           <h3 className="text-2xl font-bold mb-4">About Us</h3>
@@ -65,26 +65,34 @@ function Footer() {
           </ul>
         </div>
 
-        {/* Contact Us Section */}
+        {/* Contact Info Section */}
         <div>
-          <h3 className="text-2xl font-bold mb-4">Contact Us</h3>
-          <p className="text-gray-200 leading-relaxed">
-            <strong>Email:</strong>{" "}
-            <a
-              href="mailto:support@devicorn.com"
-              className="hover:text-primary transition duration-300"
-            >
-              contact@yatriyatra.com
-            </a>
-          </p>
-          <p className="text-gray-200 leading-relaxed">
-            <strong>Phone:</strong> +91 9910960325, +91 8191068288
-          </p>
-          <p className="text-gray-200 leading-relaxed">
-            <strong>Location:</strong> Shop No. 09, First Floor, Global City
-            Centre-2, Above Dominos, Near Flora Avenue 33, Sector-33, Sohna
-            Road, Gurugram, Haryana-122103
-          </p>
+          <h3 className="text-2xl font-bold mb-4">Our Contact Info</h3>
+          <div className="space-y-6 text-gray-200">
+            <div>
+              <h4 className="font-semibold">Registered Address:</h4>
+              <p>
+                The i-Thum, Tower-B, Office No. 1028, 10th Floor, Plot No. A-40,
+                Block -A, Sector-62, Gautam Buddha Nagar, Noida, Uttar Pradesh,
+                India, 201309
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold">Delhi Branch Address:</h4>
+              <p>
+                First Floor, Office No. 102, Shree Shyam Complex, Vikas Marg,
+                Laxmi Nagar, East Delhi, Delhi, 110092
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold">Haryana Branch Address:</h4>
+              <p>
+                Shop No. 09, First Floor, Global City Centre-2, Above Dominos,
+                Near Flora Avenue 33, Sector-33, Sohna Road, Gurugram,
+                Haryana-122103
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -92,35 +100,32 @@ function Footer() {
       <div className="my-8 border-t border-gray-500"></div>
 
       {/* Bottom Section */}
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
         {/* Social Media Icons */}
-        <div className="flex space-x-6">
+        <div className="flex space-x-4">
           <Link
             href="#"
             className="w-10 h-10 flex items-center justify-center bg-primary rounded-full hover:bg-white hover:text-primary transition duration-300"
-            aria-label="Facebook"
           >
             <FaFacebookF className="text-lg" />
           </Link>
           <Link
             href="#"
             className="w-10 h-10 flex items-center justify-center bg-primary rounded-full hover:bg-white hover:text-primary transition duration-300"
-            aria-label="Twitter"
           >
             <FaTwitter className="text-lg" />
           </Link>
           <Link
             href="#"
             className="w-10 h-10 flex items-center justify-center bg-primary rounded-full hover:bg-white hover:text-primary transition duration-300"
-            aria-label="Instagram"
           >
             <FaInstagram className="text-lg" />
           </Link>
         </div>
 
         {/* Footer Text */}
-        <p className="mt-6 md:mt-0 text-gray-300 text-sm">
-          © Copyright 2024 Yatri Yatra | All Rights Reserved |
+        <p className="text-gray-300 text-sm text-center md:text-left">
+          © 2024 Yatri Yatra | All Rights Reserved
         </p>
       </div>
     </footer>

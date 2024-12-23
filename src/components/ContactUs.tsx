@@ -13,26 +13,26 @@ function ContactUs() {
 
   useEffect(() => {
     if (state.succeeded) {
-      toast("Message sent successfully");
+      toast.success("Message sent successfully");
       formRef.current?.reset();
     }
   }, [state.succeeded]);
 
   return (
-    <section className="py-16 px-6 bg-gray-100 " id="contact-us">
-      <div className="container mx-auto grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 items-center">
+    <section className="md:h-screen bg-gray-50 flex flex-col items-center justify-center px-4 md:px-8">
+      <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Left Section: Form */}
-        <div className="flex flex-col space-y-8">
-          <h2 className="text-3xl md:text-4xl font-semibold text-gray-800 text-center sm:text-left">
-            We'd Love To Hear From You
+        <div className="p-6 md:p-12 flex flex-col justify-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            Contact CLIQTAX TECHNOLOGIES PRIVATE LIMITED
           </h2>
-          <p className="text-lg text-gray-600 text-center sm:text-left">
-            Whether you have a question or just want to say hello, reach out to
-            us and we'll get back to you soon.
+          <p className="text-gray-600 mb-6">
+            We'd love to hear from you! Whether you have a question or just want
+            to say hello, reach out to us, and we'll get back to you soon.
           </p>
 
-          <form className="space-y-6" onSubmit={handleSubmit} ref={formRef}>
-            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-6">
+          <form className="space-y-4" onSubmit={handleSubmit} ref={formRef}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
                   htmlFor="name"
@@ -45,7 +45,7 @@ function ContactUs() {
                   id="name"
                   name="name"
                   required
-                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-black"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                 />
                 <ValidationError
                   prefix="Name"
@@ -53,6 +53,7 @@ function ContactUs() {
                   errors={state.errors}
                 />
               </div>
+
               <div>
                 <label
                   htmlFor="email"
@@ -65,7 +66,7 @@ function ContactUs() {
                   id="email"
                   name="email"
                   required
-                  className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-black"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                 />
                 <ValidationError
                   prefix="Email"
@@ -75,20 +76,19 @@ function ContactUs() {
               </div>
             </div>
 
-            {/* Number */}
             <div>
               <label
-                htmlFor="email"
+                htmlFor="number"
                 className="block text-sm font-medium text-gray-700"
               >
                 Phone Number
               </label>
               <input
-                type="number"
+                type="tel"
                 id="number"
                 name="number"
                 required
-                className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-black"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
               />
               <ValidationError
                 prefix="Number"
@@ -108,7 +108,7 @@ function ContactUs() {
                 id="message"
                 name="message"
                 required
-                className="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-black"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
               ></textarea>
               <ValidationError
                 prefix="Message"
@@ -117,72 +117,74 @@ function ContactUs() {
               />
             </div>
 
-            <div className="flex justify-center">
-              <button
-                type="submit"
-                disabled={state.submitting}
-                className="bg-primary hover:bg-primary/80 text-white font-semibold px-8 py-3 rounded-full shadow-lg transition-transform transform hover:scale-105"
-              >
-                Send Message
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={state.submitting}
+              className="w-full py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 focus:ring-2 focus:ring-primary"
+            >
+              Send Message
+            </button>
           </form>
         </div>
 
-        {/* Right Section: Contact Information & Image */}
-        <div className="space-y-6">
-          <h3 className="text-2xl font-semibold text-gray-800 text-center sm:text-left">
+        {/* Right Section: Contact Information */}
+        <div className="p-6 md:p-12 bg-gray-100 flex flex-col justify-center space-y-6">
+          <h3 className="text-2xl font-semibold text-gray-800">
             Our Contact Info
           </h3>
-          <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-6">
-            <div className="flex items-center gap-4 text-gray-800">
-              <FaPhoneAlt className="w-6 h-6 text-primary" />
-              <span className="text-lg">+91 9910960325, +91 8191068288</span>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <FaMapMarkerAlt className="text-primary w-6 h-6" />
+              <span className="text-gray-700 text-sm">
+                Registered Address: The i-Thum, Tower -B, Office No. 1028, 10th
+                Floor, Plot No. A-40, Block -A, Sector-62, Gautam Buddha Nagar,
+                Noida, Uttar Pradesh, India, 201309
+              </span>
             </div>
-            <div className="flex items-center gap-4 text-gray-800">
-              <FaEnvelope className="w-6 h-6 text-primary" />
-              <span className="text-lg">contact@yatriyatra.com</span>
+
+            <div className="flex items-center gap-4">
+              <FaMapMarkerAlt className="text-primary w-6 h-6" />
+              <span className="text-gray-700 text-sm">
+                Delhi Branch Address: FIRST FLOOR, OFFICE NO 102, SHREE SHYAM
+                COMPLEX, VIKAS MARG, LAXMI NAGAR, East Delhi, Delhi, 110092
+              </span>
             </div>
-          </div>
-          <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-6">
-            <div className="flex items-center gap-4 text-gray-800">
-              <FaMapMarkerAlt className="w-6 h-6 text-primary" />
-              <span className="text-lg">
-                Shop No. 09, First Floor, Global City Centre-2, Above Dominos,
-                Near Flora Avenue 33, Sector-33, Sohna Road,
-                Gurugram, Haryana-122103
+
+            <div className="flex items-center gap-4">
+              <FaMapMarkerAlt className="text-primary w-6 h-6" />
+              <span className="text-gray-700 text-sm">
+                Haryana Branch Address: Shop No. 09, First Floor, Global City
+                Centre-2, Above Dominos, Near Flora Avenue 33, Sector-33, Sohna
+                Road, Gurugram, Haryana-122103
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <FaPhoneAlt className="text-primary w-6 h-6" />
+              <span className="text-gray-700 text-sm">
+                +91 9910960325, +91 8191068288
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <FaEnvelope className="text-primary w-6 h-6" />
+              <span className="text-gray-700 text-sm">
+                contact@yatriyatra.com
               </span>
             </div>
           </div>
 
-          {/* Contact Image */}
-          <div className="relative h-72 sm:h-96 rounded-lg overflow-hidden shadow-lg mt-8 group hover:scale-105 transition-all duration-500 ease-in-out transform">
+          <div className="relative h-40 rounded-lg overflow-hidden shadow-lg">
             <Image
               src={contactImage}
               alt="Contact Us"
               layout="fill"
               objectFit="cover"
-              className="transform group-hover:scale-105 transition-transform duration-500"
               priority
+              className="hover:scale-105 transition-transform duration-500"
             />
-            {/* Decorative Overlay */}
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/40 to-transparent"></div>
           </div>
-        </div>
-      </div>
-      {/* Optional Map Section */}
-      <div className="w-full mt-24 container">
-        {/* <h3 className="text-3xl font-semibold  mb-6 text-primary">
-          Our Location
-        </h3> */}
-        <div className="relative w-full h-72 rounded-xl shadow-lg overflow-hidden">
-          <iframe
-            className="w-full h-full"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3516.1054897161197!2d77.05583717512697!3d28.364902077366146!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d34e47d9d9389%3A0x5367c58e4a339ff5!2sFlora%20Avenue%2033%2C%209328%2B654%2C%20Sohna%20-%20Gurgaon%20Rd%2C%20Bhondsi%2C%20Haryana%20122103%2C%20India!5e0!3m2!1sen!2sus!4v1687645294092!5m2!1sen!2sus"
-            loading="lazy"
-          />
-
-          {/* https://maps.app.goo.gl/YP9xbzzJqfdERvG27 */}
         </div>
       </div>
     </section>
