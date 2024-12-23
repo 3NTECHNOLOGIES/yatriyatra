@@ -19,7 +19,10 @@ function ContactUs() {
   }, [state.succeeded]);
 
   return (
-    <section className="md:h-screen bg-gray-50 flex flex-col items-center justify-center px-4 md:px-8">
+    <section
+      className="md:h-screen bg-gray-50 flex flex-col items-center justify-center px-4 md:px-8"
+      id="contact-us"
+    >
       <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Left Section: Form */}
         <div className="p-6 md:p-12 flex flex-col justify-center">
