@@ -7,7 +7,7 @@ function Banner() {
   return (
     <div className="container">
       {/* Hero Section */}
-      <section className="relative md:py-40 mt-10 py-14">
+      <section className="relative md:py-40 py-14">
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image

@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   FaGlobe,
   FaRegHeart,
@@ -13,17 +14,60 @@ import { PiAirplaneTiltFill } from "react-icons/pi";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
 
+  // Function to handle navigation to home page sections
+  const handleNavigation = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    targetSection: string
+  ) => {
+    e.preventDefault();
+
+    // Only handle routing when not on home page
+    if (pathname !== "/") {
+      router.push("/");
+
+      // Save the target section in sessionStorage to scroll after navigation completes
+      sessionStorage.setItem("scrollTarget", targetSection);
+    } else {
+      // If already on home page, just scroll to the section
+      const element = document.getElementById(targetSection.substring(1));
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
+
+  // Effect to handle scrolling to target section after navigation
+  useEffect(() => {
+    if (pathname === "/") {
+      const scrollTarget = sessionStorage.getItem("scrollTarget");
+      if (scrollTarget) {
+        // Small delay to ensure the page is fully loaded
+        setTimeout(() => {
+          const element = document.getElementById(scrollTarget.substring(1));
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+          }
+          // Clear the target after scrolling
+          sessionStorage.removeItem("scrollTarget");
+        }, 500);
+      }
+    }
+  }, [pathname]);
+
+  // Nav items with proper href attributes
   const navItems = [
-    { name: "Bus", link: "#contact-us" },
-    { name: "Train", link: "#contact-us" },
-    { name: "Flight", link: "#contact-us" },
-    { name: "Hotel", link: "#contact-us" },
-    { name: "Holidays", link: "#contact-us" },
-    { name: "Offers", link: "#contact-us" },
-    { name: "Contact", link: "#contact-us" },
-    { name: "Blog", link: "#contact-us" },
-    { name: "PayNow", link: "#contact-us" },
+    { name: "Bus", link: "/#contact-us" },
+    { name: "Train", link: "/#contact-us" },
+    { name: "Flight", link: "/#contact-us" },
+    { name: "Hotel", link: "/#contact-us" },
+    { name: "Holidays", link: "/#contact-us" },
+    { name: "Offers", link: "/#contact-us" },
+    { name: "Contact", link: "/#contact-us" },
+    { name: "Blog", link: "/blog" },
+    { name: "PayNow", link: "/#contact-us" },
   ];
 
   return (
@@ -76,13 +120,30 @@ export default function Navbar() {
         {/* Desktop Menu */}
         <ul className="hidden md:flex space-x-8 text-gray-800 font-semibold">
           {navItems?.map((item: any, index: number) => {
-            return (
-              <Link href={item?.link} key={index}>
-                <li className="hover:text-primary transition duration-300 cursor-pointer">
-                  {item?.name}
-                </li>
-              </Link>
-            );
+            // Regular link for Blog, customized navigation for others
+            if (item.name === "Blog") {
+              return (
+                <Link href={item.link} key={index}>
+                  <li className="hover:text-primary transition duration-300 cursor-pointer">
+                    {item.name}
+                  </li>
+                </Link>
+              );
+            } else {
+              return (
+                <a
+                  href={item.link}
+                  key={index}
+                  onClick={(e) =>
+                    handleNavigation(e, item.link.split("/").pop() || "")
+                  }
+                >
+                  <li className="hover:text-primary transition duration-300 cursor-pointer">
+                    {item.name}
+                  </li>
+                </a>
+              );
+            }
           })}
         </ul>
 
@@ -100,18 +161,32 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isOpen && (
         <ul className="md:hidden bg-gradient-to-b from-white to-gray-50 text-gray-800 text-center font-medium border-t">
-          <li className="py-3 hover:text-primary transition duration-300 cursor-pointer">
-            Destinations
-          </li>
-          <li className="py-3 hover:text-primary transition duration-300 cursor-pointer">
-            Adventure Styles
-          </li>
-          <li className="py-3 hover:text-primary transition duration-300 cursor-pointer">
-            Deals
-          </li>
-          <li className="py-3 hover:text-primary transition duration-300 cursor-pointer">
-            Contact
-          </li>
+          {navItems?.map((item: any, index: number) => {
+            // Regular link for Blog, customized navigation for others
+            if (item.name === "Blog") {
+              return (
+                <Link href={item.link} key={index}>
+                  <li className="py-3 hover:text-primary transition duration-300 cursor-pointer">
+                    {item.name}
+                  </li>
+                </Link>
+              );
+            } else {
+              return (
+                <a
+                  href={item.link}
+                  key={index}
+                  onClick={(e) =>
+                    handleNavigation(e, item.link.split("/").pop() || "")
+                  }
+                >
+                  <li className="py-3 hover:text-primary transition duration-300 cursor-pointer">
+                    {item.name}
+                  </li>
+                </a>
+              );
+            }
+          })}
         </ul>
       )}
     </nav>
