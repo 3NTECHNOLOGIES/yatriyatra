@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   FaFacebookF,
   FaTwitter,
@@ -16,57 +16,83 @@ interface ShareButtonProps {
 
 export function ShareButton({ title, url }: ShareButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const pageUrl =
-    url || (typeof window !== "undefined" ? window.location.href : "");
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const shareLinks = [
-    {
-      name: "Facebook",
-      icon: <FaFacebookF size={14} />,
-      color: "#3b5998",
-      getUrl: () =>
-        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+  // Generate URL only once when the component mounts or props change
+  const pageUrl = useMemo(() => {
+    return url || (typeof window !== "undefined" ? window.location.href : "");
+  }, [url]);
+
+  // Create share links only when pageUrl changes
+  const shareLinks = useMemo(
+    () => [
+      {
+        name: "Facebook",
+        icon: <FaFacebookF size={14} />,
+        color: "#3b5998",
+        url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
           pageUrl
         )}`,
-    },
-    {
-      name: "Twitter",
-      icon: <FaTwitter size={14} />,
-      color: "#1da1f2",
-      getUrl: () =>
-        `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+      },
+      {
+        name: "Twitter",
+        icon: <FaTwitter size={14} />,
+        color: "#1da1f2",
+        url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(
           title
         )}&url=${encodeURIComponent(pageUrl)}`,
-    },
-    {
-      name: "LinkedIn",
-      icon: <FaLinkedinIn size={14} />,
-      color: "#0077b5",
-      getUrl: () =>
-        `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+      },
+      {
+        name: "LinkedIn",
+        icon: <FaLinkedinIn size={14} />,
+        color: "#0077b5",
+        url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
           pageUrl
         )}`,
-    },
-    {
-      name: "WhatsApp",
-      icon: <FaWhatsapp size={14} />,
-      color: "#25d366",
-      getUrl: () =>
-        `https://wa.me/?text=${encodeURIComponent(`${title} ${pageUrl}`)}`,
-    },
-  ];
+      },
+      {
+        name: "WhatsApp",
+        icon: <FaWhatsapp size={14} />,
+        color: "#25d366",
+        url: `https://wa.me/?text=${encodeURIComponent(`${title} ${pageUrl}`)}`,
+      },
+    ],
+    [pageUrl, title]
+  );
 
-  const handleShare = (e: React.MouseEvent, url: string) => {
+  // Memoize the share handler
+  const handleShare = useCallback((e: React.MouseEvent, url: string) => {
     e.preventDefault();
     window.open(url, "_blank", "width=600,height=400");
-  };
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="text-gray-500 hover:text-secondary p-2 transition-colors rounded-full"
         aria-label="Share this article"
+        aria-expanded={isOpen}
       >
         <FaShareAlt />
       </button>
@@ -77,10 +103,20 @@ export function ShareButton({ title, url }: ShareButtonProps) {
             {shareLinks.map((link) => (
               <button
                 key={link.name}
-                onClick={(e) => handleShare(e, link.getUrl())}
-                className={`text-[${link.color}] hover:bg-[${link.color}]/10 p-2 rounded-full transition-colors`}
+                onClick={(e) => handleShare(e, link.url)}
+                className="p-2 rounded-full transition-colors"
                 aria-label={`Share on ${link.name}`}
-                style={{ color: link.color }}
+                style={{
+                  color: link.color,
+                  backgroundColor: "transparent",
+                  transition: "background-color 0.2s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = `${link.color}20`;
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
               >
                 {link.icon}
               </button>

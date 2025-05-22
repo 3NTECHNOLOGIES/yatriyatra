@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Optimized gradient background -->
+  <rect width="1200" height="630" fill="url(#grad)"/>
+  
+  <!-- Simplified mountain silhouette with fewer points -->
+  <path d="M0 430L400 280L800 380L1200 280L1200 630L0 630Z" fill="white" fill-opacity="0.08"/>
+  
+  <!-- Simplified camera icon -->
+  <rect x="550" y="275" width="100" height="80" rx="8" stroke="white" stroke-width="3" fill="none"/>
+  <circle cx="600" cy="315" r="20" stroke="white" stroke-width="3" fill="none"/>
+  <circle cx="630" cy="295" r="4" fill="white"/>
+  
+  <!-- Text - now more readable -->
+  <text x="600" y="400" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" font-weight="300">Yatri Yatra</text>
+  
+  <!-- Optimized gradient definition -->
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#1E40AF"/>
+    </linearGradient>
+  </defs>
+</svg> 

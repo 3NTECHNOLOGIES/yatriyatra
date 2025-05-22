@@ -1,37 +1,157 @@
-import { notFound } from "next/navigation";
+"use client";
+
+import React, { useEffect, useState, useMemo } from "react";
+import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { FaCalendarAlt, FaClock, FaChevronLeft } from "react-icons/fa";
+import {
+  FaCalendarAlt,
+  FaClock,
+  FaChevronLeft,
+  FaEye,
+  FaUser,
+} from "react-icons/fa";
 import { HiBookmark } from "react-icons/hi";
-import { blogPosts, BlogPost } from "@/data/blogPosts";
+import { blogService, BlogPost } from "@/services/blogService";
 import ReadingProgressBar from "@/components/ReadingProgressBar";
 import { ShareButton } from "@/components/ShareButton";
+import BlogContentViewer from "@/components/BlogContentViewer";
 
-export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    id: post.id.toString(),
-  }));
-}
+// Utility functions
+const getBlogCoverImage = (imageUrl?: string): string =>
+  imageUrl || "/images/blog-placeholder.svg";
+const formatDate = (dateString: string): string =>
+  new Date(dateString).toLocaleDateString();
+const getReadTime = (content?: string): number =>
+  Math.ceil((content?.length || 0) / 200);
 
-export default function BlogPostPage({ params }: { params: { id: string } }) {
-  const postId = parseInt(params.id);
-  const post = blogPosts.find((post: BlogPost) => post.id === postId);
+// UI Components
+const MetaItem = ({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <span className="text-white/80 text-xs flex items-center">
+    <span className="mr-2 text-white/80">{icon}</span> {children}
+  </span>
+);
 
-  if (!post) {
-    notFound();
+const Tag = ({ name }: { name: string }) => (
+  <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs hover:bg-gray-200 transition-colors cursor-pointer">
+    #{name}
+  </span>
+);
+
+export default function BlogPostPage() {
+  // Use the useParams hook to get params
+  const params = useParams();
+  const postId = params?.id as string;
+
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!postId) return;
+
+    const fetchBlog = async () => {
+      try {
+        setLoading(true);
+        const response = await blogService.getBlogById(postId);
+
+        if (!response.success || !response.data.blog) {
+          notFound();
+        }
+
+        // Verify that the blog is published, otherwise show 404
+        if (response.data.blog.status !== "published") {
+          notFound();
+        }
+
+        setPost(response.data.blog);
+        setError(null);
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          notFound();
+        }
+        setError("Failed to fetch blog post. Please try again later.");
+        console.error("Error fetching blog:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlog();
+  }, [postId]);
+
+  // Memoized values
+  const tags = useMemo(() => ["travel", "adventure", "vacation"], []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+      </div>
+    );
   }
 
-  // Tags specific to this post
-  const tags = ["travel", "summer", "vacation"];
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4">
+            <svg
+              className="mx-auto h-12 w-12 text-red-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Error Loading Blog Post
+          </h3>
+          <p className="text-red-500 mb-4">{error}</p>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+            >
+              Try Again
+            </button>
+            <Link
+              href="/blog"
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+            >
+              Back to Blog
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return null; // This will trigger the notFound() UI
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" suppressHydrationWarning>
       {/* Hero Header */}
       <div className="relative h-[50vh] md:h-[60vh] w-full overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
-            src={post.imageUrl}
+            src={getBlogCoverImage(post.imageUrl)}
             alt={post.title}
             fill
             priority
@@ -42,17 +162,20 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
         </div>
 
         {/* Content positioned at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 px-6 md:px-12 pb-12 text-white z-10 w-full max-w-5xl mx-auto">
-          <div className="mb-4 flex items-center space-x-3">
+        <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+          <div className="mb-4 flex items-center flex-wrap gap-3">
             <span className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-medium rounded-md">
-              {post.category}
+              {post.category.name}
             </span>
-            <span className="text-white/80 text-xs flex items-center">
-              <FaCalendarAlt className="mr-2 text-white/80" /> {post.date}
-            </span>
-            <span className="text-white/80 text-xs flex items-center">
-              <FaClock className="mr-2 text-white/80" /> {post.readTime}
-            </span>
+            <MetaItem icon={<FaCalendarAlt />}>
+              {formatDate(post.date)}
+            </MetaItem>
+            <MetaItem icon={<FaEye />}>{post.views} views</MetaItem>
+            {post.content && (
+              <MetaItem icon={<FaClock />}>
+                {getReadTime(post.content)} min read
+              </MetaItem>
+            )}
           </div>
 
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
@@ -60,20 +183,14 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
           </h1>
 
           <div className="flex items-center">
-            <div className="relative w-10 h-10 mr-3">
-              <Image
-                src={post.authorImage}
-                alt={post.author}
-                fill
-                className="rounded-full border border-white/30 object-cover"
-                sizes="40px"
-              />
+            <div className="flex-shrink-0 h-10 w-10 mr-3 bg-white/20 rounded-full flex items-center justify-center text-white">
+              <FaUser />
             </div>
             <div>
               <h3 className="font-medium text-white text-sm md:text-base">
-                {post.author}
+                {post.author.name}
               </h3>
-              <p className="text-xs text-white/70">{post.authorRole}</p>
+              <p className="text-xs text-white/70">{post.author.email}</p>
             </div>
           </div>
         </div>
@@ -83,7 +200,7 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
       <ReadingProgressBar />
 
       {/* Main Content Area */}
-      <div className="bg-white shadow-sm -mt-6 relative rounded-t-3xl z-10">
+      <div className="relative bg-white shadow-sm -mt-6 rounded-t-3xl z-10">
         <div className="max-w-3xl mx-auto px-6 md:px-8 py-12">
           {/* Navigation Bar */}
           <div className="flex justify-between items-center mb-8 pb-6 border-b border-gray-100">
@@ -107,30 +224,32 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
           </div>
 
           {/* Article Excerpt */}
-          <div className="mb-8">
-            <p className="text-xl text-gray-600 leading-relaxed border-l-4 border-secondary pl-4 italic">
-              {post.excerpt}
-            </p>
-          </div>
+          {/* {post.content && post.content.length > 100 && (
+            <div className="mb-8">
+              <p className="text-xl text-gray-600 leading-relaxed border-l-4 border-secondary pl-4 italic">
+                {post.content.substring(0, 120).replace(/<[^>]*>/g, "")}...
+              </p>
+            </div>
+          )} */}
 
           {/* Article Content */}
-          <article className="prose prose-slate max-w-none prose-headings:text-gray-800 prose-headings:font-bold prose-p:text-gray-600 prose-a:text-secondary prose-a:font-medium prose-img:rounded-lg prose-img:shadow-sm mb-12">
-            <div
-              dangerouslySetInnerHTML={{ __html: post.content }}
-              className="blog-content"
-            />
+          <article className="mb-12">
+            {post.content ? (
+              <BlogContentViewer content={post.content} />
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>
+                  The complete content of this article is not available yet.
+                </p>
+              </div>
+            )}
           </article>
 
           {/* Tags */}
-          <div className="flex flex-wrap items-center gap-2 mb-12 pt-6 border-t border-gray-100">
+          <div className="flex flex-wrap gap-2 items-center mb-12 pt-6 border-t border-gray-100">
             <span className="text-gray-700 text-sm font-medium">Tags:</span>
             {tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs hover:bg-gray-200 transition-colors cursor-pointer"
-              >
-                #{tag}
-              </span>
+              <Tag key={tag} name={tag} />
             ))}
           </div>
         </div>
@@ -147,7 +266,7 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
-              href="/#contact-us"
+              href="/#packages"
               className="inline-flex items-center px-6 py-3 bg-white text-secondary text-sm font-medium rounded-md hover:bg-gray-100 transition-colors"
             >
               Explore Packages
