@@ -151,7 +151,7 @@ export default function BlogPostPage() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
-            src={getBlogCoverImage(post.imageUrl)}
+            src={getBlogCoverImage(post.coverImage)}
             alt={post.title}
             fill
             priority
@@ -233,7 +233,7 @@ export default function BlogPostPage() {
           )} */}
 
           {/* Article Content */}
-          <article className="mb-12">
+          <article className="mb-12 text-black">
             {post.content ? (
               <BlogContentViewer content={post.content} />
             ) : (

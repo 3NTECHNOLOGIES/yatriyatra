@@ -59,15 +59,11 @@ export default function Navbar() {
 
   // Nav items with proper href attributes
   const navItems = [
-    { name: "Bus", link: "/#contact-us" },
-    { name: "Train", link: "/#contact-us" },
-    { name: "Flight", link: "/#contact-us" },
-    { name: "Hotel", link: "/#contact-us" },
-    { name: "Holidays", link: "/#contact-us" },
-    { name: "Offers", link: "/#contact-us" },
+    { name: "Destinations", link: "/#contact-us" },
+    { name: "Packages", link: "/#contact-us" },
     { name: "Contact", link: "/#contact-us" },
     { name: "Blog", link: "/blog" },
-    { name: "PayNow", link: "/#contact-us" },
+    { name: "Pay Now", link: "/#contact-us" },
   ];
 
   return (

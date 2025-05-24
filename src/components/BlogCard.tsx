@@ -42,7 +42,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, isFeatured = false }) => {
           <Link href={`/blog/${post.id}`}>
             <div className="relative w-full h-full">
               <Image
-                src={getBlogCoverImage(post.imageUrl)}
+                src={getBlogCoverImage(post.coverImage)}
                 alt={post.title}
                 fill
                 priority={isFeatured}

@@ -23,7 +23,7 @@ export interface BlogPost {
   status: string;
   views: number;
   content?: string;
-  imageUrl?: string;
+  coverImage?: string;
   createdAt?: string;
   updatedAt?: string;
   featured?: boolean;
