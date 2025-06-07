@@ -17,8 +17,9 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    Origin: "https://yatriyatra.com",
   },
-  timeout: 10000,
+  timeout: 30000,
 });
 
 // Request interceptor
@@ -52,18 +53,31 @@ api.interceptors.response.use(
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
       authService.clearTokens();
+      window.location.href = "/login";
+      return Promise.reject(error);
     }
 
     // If it's a server error (500), add custom message
     if (error.response?.status === 500) {
-      const customError = new Error(
+      const message =
         error.response.data?.message ||
-          "The server encountered an error. Please try again later."
-      );
-      return Promise.reject(customError);
+        "The server encountered an error. Please try again later.";
+      return Promise.reject(new Error(message));
     }
 
-    return Promise.reject(error);
+    // If it's a CORS error, provide more helpful message
+    if (!error.response && error.message === "Network Error") {
+      return Promise.reject(
+        new Error("Unable to connect to the API. Please try again later.")
+      );
+    }
+
+    // For other errors, use the server's error message if available
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      "An unexpected error occurred";
+    return Promise.reject(new Error(message));
   }
 );
 
