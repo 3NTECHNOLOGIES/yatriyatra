@@ -5,11 +5,10 @@ import axios, {
 } from "axios";
 import { authService } from "./authService";
 
-// In development, use the proxy. In production, use the actual API URL
-const API_BASE_URL =
-  process.env.NODE_ENV === "development"
-    ? "/api/v1" // This will be proxied through Next.js
-    : "http://api.yatriyatra.com/api/v1";
+const isDevelopment = process.env.NODE_ENV === "development";
+const API_BASE_URL = isDevelopment
+  ? "/api/v1" // This will be proxied through Next.js in development
+  : "https://api.yatriyatra.com/api/v1"; // Direct API call in production
 
 // Create a custom axios instance
 const api = axios.create({
@@ -17,9 +16,13 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    // Add CORS headers
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
   },
-  // Add CORS settings
-  withCredentials: true,
+  // Important: Don't send credentials in development since we're using a proxy
+  withCredentials: !isDevelopment,
 });
 
 // Request interceptor
@@ -38,6 +41,11 @@ api.interceptors.request.use(
         ...config.params,
         _t: Date.now(),
       };
+    }
+
+    // Add origin header in production
+    if (!isDevelopment && config.headers) {
+      config.headers["Origin"] = window.location.origin;
     }
 
     return config;
