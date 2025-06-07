@@ -5,10 +5,8 @@ import axios, {
 } from "axios";
 import { authService } from "./authService";
 
-const isDevelopment = process.env.NODE_ENV === "development";
-const API_BASE_URL = isDevelopment
-  ? "/api/v1" // This will be proxied through Next.js in development
-  : "https://api.yatriyatra.com/api/v1"; // Direct API call in production
+// Use the rewritten API URL which will be handled by Next.js
+const API_BASE_URL = "/api/v1";
 
 // Create a custom axios instance
 const api = axios.create({
@@ -19,8 +17,8 @@ const api = axios.create({
   },
   // Add timeout
   timeout: 10000,
-  // Remove withCredentials
-  withCredentials: false,
+  // Enable credentials
+  withCredentials: true,
 });
 
 // Request interceptor
@@ -42,12 +40,13 @@ api.interceptors.request.use(
     }
 
     // Log request in development
-    if (isDevelopment) {
+    if (process.env.NODE_ENV === "development") {
       console.log("API Request:", {
         url: config.url,
         method: config.method,
         headers: config.headers,
         params: config.params,
+        data: config.data,
       });
     }
 
@@ -63,7 +62,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response: AxiosResponse) => {
     // Log successful response in development
-    if (isDevelopment) {
+    if (process.env.NODE_ENV === "development") {
       console.log("API Response:", {
         url: response.config.url,
         status: response.status,
@@ -99,6 +98,16 @@ api.interceptors.response.use(
       (customError as any).originalError = error;
       (customError as any).details = errorDetails;
       return Promise.reject(customError);
+    }
+
+    // If it's a CORS error, provide more helpful message
+    if (!error.response && error.message === "Network Error") {
+      const corsError = new Error(
+        "Unable to connect to the API. This might be a CORS or network issue."
+      );
+      (corsError as any).originalError = error;
+      (corsError as any).details = errorDetails;
+      return Promise.reject(corsError);
     }
 
     return Promise.reject(error);
