@@ -17,7 +17,9 @@ const api = axios.create({
     "Content-Type": "application/json",
     Accept: "application/json",
   },
-  // Remove withCredentials as it can cause CORS preflight issues
+  // Add timeout
+  timeout: 10000,
+  // Remove withCredentials
   withCredentials: false,
 });
 
@@ -39,9 +41,20 @@ api.interceptors.request.use(
       };
     }
 
+    // Log request in development
+    if (isDevelopment) {
+      console.log("API Request:", {
+        url: config.url,
+        method: config.method,
+        headers: config.headers,
+        params: config.params,
+      });
+    }
+
     return config;
   },
   (error: AxiosError) => {
+    console.error("Request Error:", error);
     return Promise.reject(error);
   }
 );
@@ -49,22 +62,43 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response: AxiosResponse) => {
+    // Log successful response in development
+    if (isDevelopment) {
+      console.log("API Response:", {
+        url: response.config.url,
+        status: response.status,
+        data: response.data,
+      });
+    }
     return response;
   },
   async (error: AxiosError) => {
+    // Handle 401 Unauthorized
     if (error.response?.status === 401) {
       authService.clearTokens();
     }
 
-    // Handle CORS errors with more detailed logging
-    if (error.message === "Network Error") {
-      console.error("CORS Error Details:", {
-        url: error.config?.url,
-        method: error.config?.method,
-        headers: error.config?.headers,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-      });
+    // Log detailed error information
+    const errorDetails = {
+      message: error.message,
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      headers: error.config?.headers,
+      responseData: error.response?.data,
+    };
+
+    console.error("API Error:", errorDetails);
+
+    // If it's a server error (500), add custom message
+    if (error.response?.status === 500) {
+      const customError = new Error(
+        "The server encountered an error. Please try again later."
+      );
+      (customError as any).originalError = error;
+      (customError as any).details = errorDetails;
+      return Promise.reject(customError);
     }
 
     return Promise.reject(error);

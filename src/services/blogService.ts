@@ -95,19 +95,56 @@ export const blogService = {
       const formattedResponse = response.data;
 
       // Process all blogs in one pass if data exists
-      if (formattedResponse.success && formattedResponse.data.blogs) {
+      if (formattedResponse.success && formattedResponse.data?.blogs) {
         formattedResponse.data.blogs = formattedResponse.data.blogs.map(
           (blog: Partial<BlogPost>) => ({
             ...blog,
             date: blog.createdAt || blog.date || new Date().toISOString(),
+            // Ensure all required fields have default values
+            title: blog.title || "Untitled Blog",
+            author: blog.author || { id: "", name: "Anonymous", email: "" },
+            category: blog.category || {
+              id: "",
+              name: "Uncategorized",
+              slug: "uncategorized",
+            },
+            status: blog.status || "published",
+            views: blog.views || 0,
+            coverImage: blog.coverImage || "",
           })
         );
+      } else {
+        // If no blogs data, provide empty array with proper structure
+        formattedResponse.data = {
+          blogs: [],
+          page: filters.page || 1,
+          limit: filters.limit || 10,
+          totalPages: 0,
+          totalResults: 0,
+        };
       }
 
       return formattedResponse;
-    } catch (error) {
-      console.error("Error fetching blogs:", error);
-      throw error;
+    } catch (error: any) {
+      console.error("Error fetching blogs:", {
+        error,
+        filters,
+        message: error.message,
+        response: error.response?.data,
+      });
+
+      // Return a structured error response instead of throwing
+      return {
+        success: false,
+        message: error.message || "Failed to fetch blogs",
+        data: {
+          blogs: [],
+          page: filters.page || 1,
+          limit: filters.limit || 10,
+          totalPages: 0,
+          totalResults: 0,
+        },
+      };
     }
   },
 
