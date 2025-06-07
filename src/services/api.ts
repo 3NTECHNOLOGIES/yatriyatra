@@ -5,7 +5,11 @@ import axios, {
 } from "axios";
 import { authService } from "./authService";
 
-const API_BASE_URL = "/api/v1";
+// In development, use the proxy. In production, use the actual API URL
+const API_BASE_URL =
+  process.env.NODE_ENV === "development"
+    ? "/api/v1" // This will be proxied through Next.js
+    : "http://api.yatriyatra.com/api/v1";
 
 // Create a custom axios instance
 const api = axios.create({

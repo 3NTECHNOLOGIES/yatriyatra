@@ -7,8 +7,10 @@ import { FaCalendarAlt, FaClock, FaUser } from "react-icons/fa";
 import { BlogPost } from "@/services/blogService";
 
 // Utility functions
-const getBlogCoverImage = (imageUrl?: string): string =>
-  imageUrl || "/images/blog-placeholder.svg";
+const getBlogCoverImage = (imageUrl?: string): string => {
+  if (!imageUrl) return "/images/blog-placeholder.svg";
+  return imageUrl;
+};
 
 const formatDate = (dateString: string): string =>
   new Date(dateString).toLocaleDateString();
@@ -40,20 +42,30 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, isFeatured = false }) => {
       <div className={isFeatured ? "grid md:grid-cols-2 gap-0" : ""}>
         <div className={`relative ${imageHeight} overflow-hidden`}>
           <Link href={`/blog/${post.id}`}>
-            <div className="relative w-full h-full">
-              <Image
-                src={getBlogCoverImage(post.coverImage)}
-                alt={post.title}
-                fill
-                priority={isFeatured}
-                className="object-cover transition duration-700 hover:scale-105"
-                sizes={
-                  isFeatured
-                    ? "(max-width: 768px) 100vw, 50vw"
-                    : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                }
-              />
-            </div>
+            {post.coverImage ? (
+              <div className="relative w-full h-full">
+                <img
+                  src={getBlogCoverImage(post.coverImage)}
+                  alt={post.title}
+                  className="object-cover w-full h-full transition duration-700 hover:scale-105"
+                />
+              </div>
+            ) : (
+              <div className="relative w-full h-full">
+                <Image
+                  src="/images/blog-placeholder.svg"
+                  alt={post.title}
+                  fill
+                  priority={isFeatured}
+                  className="object-cover transition duration-700 hover:scale-105"
+                  sizes={
+                    isFeatured
+                      ? "(max-width: 768px) 100vw, 50vw"
+                      : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  }
+                />
+              </div>
+            )}
           </Link>
           {!isFeatured && (
             <div className="absolute top-4 right-4">

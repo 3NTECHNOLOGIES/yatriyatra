@@ -1,15 +1,31 @@
-import type { NextConfig } from "next";
+import { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
-    domains: ["images.unsplash.com", "localhost", "api.yatriyatra.com"],
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "api.yatriyatra.com",
+        port: "",
+        pathname: "/api/v1/images/**",
+      },
+      {
+        protocol: "https",
+        hostname: "api.yatriyatra.com",
+        port: "",
+        pathname: "/api/v1/images/**",
+      },
+    ],
+    minimumCacheTTL: 60,
+    unoptimized: true,
+    domains: ["api.yatriyatra.com"],
   },
   async rewrites() {
     return [
       {
         source: "/api/:path*",
         destination: "http://api.yatriyatra.com/api/:path*",
+        basePath: false,
       },
     ];
   },
