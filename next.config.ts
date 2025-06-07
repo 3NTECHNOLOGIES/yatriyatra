@@ -4,12 +4,6 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "http",
-        hostname: "api.yatriyatra.com",
-        port: "",
-        pathname: "/api/v1/images/**",
-      },
-      {
         protocol: "https",
         hostname: "api.yatriyatra.com",
         port: "",
