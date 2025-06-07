@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
-import Navbar from "@/components/navbar.tsx/Navbar";
+import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {

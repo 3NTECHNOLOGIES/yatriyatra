@@ -5,8 +5,7 @@ import axios, {
 } from "axios";
 import { authService } from "./authService";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const API_BASE_URL = "/api/v1";
 
 // Create a custom axios instance
 const api = axios.create({
@@ -15,6 +14,8 @@ const api = axios.create({
     "Content-Type": "application/json",
     Accept: "application/json",
   },
+  // Add CORS settings
+  withCredentials: true,
 });
 
 // Request interceptor
@@ -60,6 +61,16 @@ api.interceptors.response.use(
     // Handle CORS errors
     if (error.message === "Network Error") {
       console.error("A network error occurred. This could be a CORS issue.");
+      // Log more details about the error
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response,
+        request: {
+          headers: error.config?.headers,
+          url: error.config?.url,
+          method: error.config?.method,
+        },
+      });
     }
 
     return Promise.reject(error);
