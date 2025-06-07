@@ -16,13 +16,9 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
-    // Add CORS headers
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
   },
-  // Important: Don't send credentials in development since we're using a proxy
-  withCredentials: !isDevelopment,
+  // Remove withCredentials as it can cause CORS preflight issues
+  withCredentials: false,
 });
 
 // Request interceptor
@@ -43,11 +39,6 @@ api.interceptors.request.use(
       };
     }
 
-    // Add origin header in production
-    if (!isDevelopment && config.headers) {
-      config.headers["Origin"] = window.location.origin;
-    }
-
     return config;
   },
   (error: AxiosError) => {
@@ -61,27 +52,18 @@ api.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    // Handle common errors like 401, 403, etc.
     if (error.response?.status === 401) {
-      // Clear invalid token
       authService.clearTokens();
-
-      // You might redirect to login page here
-      // or show a login modal
     }
 
-    // Handle CORS errors
+    // Handle CORS errors with more detailed logging
     if (error.message === "Network Error") {
-      console.error("A network error occurred. This could be a CORS issue.");
-      // Log more details about the error
-      console.error("Error details:", {
-        message: error.message,
-        response: error.response,
-        request: {
-          headers: error.config?.headers,
-          url: error.config?.url,
-          method: error.config?.method,
-        },
+      console.error("CORS Error Details:", {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
       });
     }
 
@@ -89,9 +71,8 @@ api.interceptors.response.use(
   }
 );
 
-// Initialize auth from URL if needed (for development/testing)
+// Initialize auth from URL if needed
 if (typeof window !== "undefined") {
-  // Only run in browser context
   authService.initializeFromUrl();
 }
 
