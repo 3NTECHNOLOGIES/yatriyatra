@@ -1,4 +1,3 @@
-import api from "./api";
 import { authService } from "./authService";
 
 export interface BlogCategory {
@@ -59,79 +58,45 @@ export interface BlogFilters {
   status?: string;
 }
 
-// Optimized function to clean up blog content
-const cleanBlogContent = (content?: string): string => {
-  if (!content) return "";
-
-  // Clean up content in one pass
-  return content
-    .replace(/&nbsp;<pre/g, "<pre")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
-};
-
-// Cache for blog data to prevent redundant requests
-const blogCache = new Map<string, { data: BlogPost; timestamp: number }>();
-const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
-const MAX_CACHE_SIZE = 100; // Maximum number of items to cache
-
-// Helper to clean up old cache entries
-const cleanupCache = () => {
-  const now = Date.now();
-  const entries = Array.from(blogCache.entries());
-
-  // Remove expired entries
-  entries.forEach(([key, value]) => {
-    if (now - value.timestamp > CACHE_EXPIRY) {
-      blogCache.delete(key);
-    }
-  });
-
-  // If still over size limit, remove oldest entries
-  if (blogCache.size > MAX_CACHE_SIZE) {
-    const sortedEntries = entries.sort(
-      (a, b) => a[1].timestamp - b[1].timestamp
-    );
-    const entriesToRemove = sortedEntries.slice(
-      0,
-      blogCache.size - MAX_CACHE_SIZE
-    );
-    entriesToRemove.forEach(([key]) => blogCache.delete(key));
-  }
-};
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://api.yatriyatra.com/api/v1";
 
 export const blogService = {
-  async getBlogs(filters: BlogFilters = {}): Promise<BlogResponse> {
+  async getBlogs(filters: BlogFilters = {}) {
     try {
-      // Set default status to "published" if not specified
-      const filtersWithDefaults = {
-        ...filters,
-        status: filters.status || "published",
-      };
+      // Build query string from filters
+      const queryParams = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) queryParams.append(key, String(value));
+      });
 
-      // Build query params in a single step
-      const params = new URLSearchParams(
-        Object.entries(filtersWithDefaults)
-          .filter(([_, value]) => value !== undefined && value !== "")
-          .map(([key, value]) => [key, String(value)])
-      );
-
-      // Add cache buster for non-cached requests
-      if (!filters.categoryId && !filters.search) {
-        params.append("_t", Date.now().toString());
+      // Add default status if not provided
+      if (!filters.status) {
+        queryParams.append("status", "published");
       }
 
-      const response = await api.get(`/blogs?${params.toString()}`);
-      const formattedResponse = response.data;
+      const response = await fetch(
+        `${API_BASE_URL}/blogs?${queryParams.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
 
-      // Process all blogs in one pass if data exists
-      if (formattedResponse.success && formattedResponse.data?.blogs) {
-        formattedResponse.data.blogs = formattedResponse.data.blogs.map(
-          (blog: Partial<BlogPost>) => ({
+      if (!response.ok) {
+        throw new Error("Failed to fetch blogs");
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data: {
+          blogs: data.blogs.map((blog: BlogPost) => ({
             ...blog,
             date: blog.createdAt || blog.date || new Date().toISOString(),
-            // Ensure all required fields have default values
             title: blog.title || "Untitled Blog",
             author: blog.author || { id: "", name: "Anonymous", email: "" },
             category: blog.category || {
@@ -142,43 +107,19 @@ export const blogService = {
             status: blog.status || "published",
             views: blog.views || 0,
             coverImage: blog.coverImage || "",
-          })
-        );
-
-        // Cache individual blog posts
-        formattedResponse.data.blogs.forEach((blog: BlogPost) => {
-          blogCache.set(blog.id, {
-            data: blog,
-            timestamp: Date.now(),
-          });
-        });
-
-        // Clean up cache periodically
-        cleanupCache();
-      } else {
-        // If no blogs data, provide empty array with proper structure
-        formattedResponse.data = {
-          blogs: [],
-          page: filters.page || 1,
-          limit: filters.limit || 10,
-          totalPages: 0,
-          totalResults: 0,
-        };
-      }
-
-      return formattedResponse;
-    } catch (error: any) {
-      console.error("Error fetching blogs:", {
-        error,
-        filters,
-        message: error.message,
-        response: error.response?.data,
-      });
-
-      // Return a structured error response instead of throwing
+          })),
+          totalPages: data.totalPages,
+          page: data.page,
+          limit: data.limit,
+          totalResults: data.totalResults,
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching blogs:", error);
       return {
         success: false,
-        message: error.message || "Failed to fetch blogs",
+        message:
+          error instanceof Error ? error.message : "Failed to fetch blogs",
         data: {
           blogs: [],
           page: filters.page || 1,
@@ -190,87 +131,40 @@ export const blogService = {
     }
   },
 
-  async getBlogById(
-    id: string,
-    requirePublished: boolean = true
-  ): Promise<BlogDetailResponse> {
+  async getBlogById(id: string) {
     try {
-      // Check cache first
-      const cachedBlog = blogCache.get(id);
-      const now = Date.now();
-
-      if (cachedBlog && now - cachedBlog.timestamp < CACHE_EXPIRY) {
-        // If requiring published blogs, check status before returning cache result
-        if (requirePublished && cachedBlog.data.status !== "published") {
-          const error = new Error("Blog post not found or not published");
-          (error as any).response = { status: 404 };
-          throw error;
-        }
-
-        return {
-          success: true,
-          message: "Blog retrieved from cache",
-          data: { blog: cachedBlog.data },
-        };
-      }
-
-      // No cache hit, fetch from API
-      const token = authService.getAccessToken();
-
-      const response = await api.get(`/blogs/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/blogs/${id}`, {
+        method: "GET",
         headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token || ""}`,
+          "Content-Type": "application/json",
         },
+        credentials: "include",
       });
 
-      const data = response.data;
-
-      // Process blog data when available
-      if (data.success && data.data.blog) {
-        const blog = data.data.blog;
-
-        // If requiring published blogs, check status
-        if (requirePublished && blog.status !== "published") {
-          const error = new Error("Blog post not found or not published");
-          (error as any).response = { status: 404 };
-          throw error;
-        }
-
-        // Ensure date field exists
-        if (!blog.date && blog.createdAt) {
-          blog.date = blog.createdAt;
-        }
-
-        // Clean up HTML content
-        if (blog.content) {
-          blog.content = cleanBlogContent(blog.content);
-        }
-
-        // Store in cache
-        blogCache.set(id, {
-          data: blog,
-          timestamp: now,
-        });
-
-        // Clean up cache periodically
-        cleanupCache();
+      if (!response.ok) {
+        throw new Error("Blog post not found");
       }
 
-      return data;
-    } catch (error: any) {
-      console.error(`Error fetching blog by id ${id}:`, error);
-      const errorResponse: BlogDetailResponse = {
+      const data = await response.json();
+      return {
+        success: true,
+        data: {
+          blog: {
+            ...data.blog,
+            date:
+              data.blog.createdAt || data.blog.date || new Date().toISOString(),
+            content: data.blog.content || "",
+          },
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching blog by id:", error);
+      return {
         success: false,
-        message: error.response?.data?.message || "Failed to fetch blog",
+        message:
+          error instanceof Error ? error.message : "Failed to fetch blog",
         data: { blog: {} as BlogPost },
       };
-      throw errorResponse;
     }
-  },
-
-  // Clear the cache for testing or when needed
-  clearCache() {
-    blogCache.clear();
   },
 };

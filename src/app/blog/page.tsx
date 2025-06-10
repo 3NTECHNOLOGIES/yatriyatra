@@ -4,8 +4,31 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { FaSearch, FaTimes, FaChevronDown } from "react-icons/fa";
 import dynamic from "next/dynamic";
-import { blogService, BlogFilters, BlogPost } from "@/services/blogService";
+import { BlogPost } from "@/services/blogService";
 import BlogCard from "@/components/BlogCard";
+
+// Types
+interface BlogFilters {
+  page: number;
+  limit: number;
+  sortBy: string;
+  orderBy: string;
+  status: string;
+  search?: string;
+  categoryId?: string;
+}
+
+interface BlogResponse {
+  success: boolean;
+  message: string;
+  data: {
+    blogs: BlogPost[];
+    totalPages: number;
+    page: number;
+    limit: number;
+    totalResults: number;
+  };
+}
 
 // Custom hooks
 function useDebounce<T>(value: T, delay: number): T {
@@ -27,6 +50,9 @@ const SortDropdown = dynamic(() => import("@/components/SortDropdown"), {
     </div>
   ),
 });
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://api.yatriyatra.com/api/v1";
 
 export default function BlogPage() {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
@@ -56,25 +82,45 @@ export default function BlogPage() {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        const response = await blogService.getBlogs(filters);
 
-        if (response.success) {
-          setBlogs(response.data.blogs);
-          setTotalPages(response.data.totalPages);
+        // Build query string from filters
+        const queryParams = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value) queryParams.append(key, String(value));
+        });
 
+        const response = await fetch(`/api/blogs?${queryParams.toString()}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch blogs");
+        }
+
+        const responseData = (await response.json()) as BlogResponse;
+
+        if (responseData.success && responseData.data.blogs) {
+          setBlogs(responseData.data.blogs);
+          setTotalPages(responseData.data.totalPages);
+
+          // Extract unique categories
           const uniqueCategories = [
             "All Posts",
             ...Array.from(
-              new Set(response.data.blogs.map((post) => post.category.name))
+              new Set(responseData.data.blogs.map((post) => post.category.name))
             ),
           ];
           setCategories(uniqueCategories);
           setError(null);
         } else {
-          setError(response.message || "Failed to fetch blogs");
+          setError(responseData.message || "No blogs found");
         }
       } catch (err) {
-        setError("Failed to fetch blogs. Please try again later.");
+        setError(err instanceof Error ? err.message : "Failed to fetch blogs");
         console.error("Error fetching blogs:", err);
       } finally {
         setLoading(false);

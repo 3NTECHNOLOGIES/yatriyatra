@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -12,7 +12,7 @@ import {
   FaUser,
 } from "react-icons/fa";
 import { HiBookmark } from "react-icons/hi";
-import { blogService, BlogPost } from "@/services/blogService";
+import { BlogPost } from "@/services/blogService";
 import ReadingProgressBar from "@/components/ReadingProgressBar";
 import { ShareButton } from "@/components/ShareButton";
 import BlogContentViewer from "@/components/BlogContentViewer";
@@ -20,8 +20,14 @@ import BlogContentViewer from "@/components/BlogContentViewer";
 // Utility functions
 const getBlogCoverImage = (imageUrl?: string): string =>
   imageUrl || "/images/blog-placeholder.svg";
+
 const formatDate = (dateString: string): string =>
-  new Date(dateString).toLocaleDateString();
+  new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
 const getReadTime = (content?: string): number =>
   Math.ceil((content?.length || 0) / 200);
 
@@ -38,14 +44,15 @@ const MetaItem = ({
   </span>
 );
 
-const Tag = ({ name }: { name: string }) => (
-  <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs hover:bg-gray-200 transition-colors cursor-pointer">
-    #{name}
-  </span>
-);
+interface BlogDetailResponse {
+  success: boolean;
+  message: string;
+  data: {
+    blog: BlogPost;
+  };
+}
 
 export default function BlogPostPage() {
-  // Use the useParams hook to get params
   const params = useParams();
   const postId = params?.id as string;
 
@@ -54,94 +61,57 @@ export default function BlogPostPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!postId) return;
-
-    const fetchBlog = async () => {
+    const fetchBlogPost = async () => {
       try {
         setLoading(true);
-        const response = await blogService.getBlogById(postId);
+        const response = await fetch(`/api/blogs/${postId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+        });
 
-        if (!response.success || !response.data.blog) {
-          notFound();
+        if (!response.ok) {
+          if (response.status === 404) {
+            notFound();
+          }
+          throw new Error("Failed to fetch blog post");
         }
 
-        // Verify that the blog is published, otherwise show 404
-        if (response.data.blog.status !== "published") {
-          notFound();
-        }
+        const responseData = (await response.json()) as BlogDetailResponse;
 
-        setPost(response.data.blog);
-        setError(null);
-      } catch (err: any) {
-        if (err.response?.status === 404) {
-          notFound();
+        if (responseData.success && responseData.data.blog) {
+          setPost(responseData.data.blog);
+          setError(null);
+        } else {
+          setError(responseData.message || "Failed to fetch blog post");
         }
-        setError("Failed to fetch blog post. Please try again later.");
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch blog post"
+        );
         console.error("Error fetching blog:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBlog();
+    if (postId) {
+      fetchBlogPost();
+    }
   }, [postId]);
-
-  // Memoized values
-  const tags = useMemo(() => ["travel", "adventure", "vacation"], []);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="mb-4">
-            <svg
-              className="mx-auto h-12 w-12 text-red-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Error Loading Blog Post
-          </h3>
-          <p className="text-red-500 mb-4">{error}</p>
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-            >
-              Try Again
-            </button>
-            <Link
-              href="/blog"
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-            >
-              Back to Blog
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!post) {
-    return null; // This will trigger the notFound() UI
+  if (error || !post) {
+    return notFound();
   }
 
   return (
@@ -223,61 +193,16 @@ export default function BlogPostPage() {
             </div>
           </div>
 
-          {/* Article Excerpt */}
-          {/* {post.content && post.content.length > 100 && (
-            <div className="mb-8">
-              <p className="text-xl text-gray-600 leading-relaxed border-l-4 border-secondary pl-4 italic">
-                {post.content.substring(0, 120).replace(/<[^>]*>/g, "")}...
-              </p>
-            </div>
-          )} */}
-
           {/* Article Content */}
-          <article className="mb-12 text-black">
+          <article className="prose prose-lg max-w-none">
             {post.content ? (
               <BlogContentViewer content={post.content} />
             ) : (
               <div className="text-center py-8 text-gray-500">
-                <p>
-                  The complete content of this article is not available yet.
-                </p>
+                <p>The content of this article is not available.</p>
               </div>
             )}
           </article>
-
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 items-center mb-12 pt-6 border-t border-gray-100">
-            <span className="text-gray-700 text-sm font-medium">Tags:</span>
-            {tags.map((tag) => (
-              <Tag key={tag} name={tag} />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Call to Action */}
-      <div className="bg-secondary py-12 text-center">
-        <div className="max-w-3xl mx-auto px-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            Ready for Your Next Adventure?
-          </h2>
-          <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
-            Browse our holiday packages and book your dream vacation today.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/#packages"
-              className="inline-flex items-center px-6 py-3 bg-white text-secondary text-sm font-medium rounded-md hover:bg-gray-100 transition-colors"
-            >
-              Explore Packages
-            </Link>
-            <Link
-              href="/#contact-us"
-              className="inline-flex items-center px-6 py-3 border border-white text-white text-sm font-medium rounded-md hover:bg-white/10 transition-colors"
-            >
-              Contact Us
-            </Link>
-          </div>
         </div>
       </div>
     </div>
