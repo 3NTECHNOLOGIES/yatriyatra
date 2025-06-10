@@ -32,7 +32,6 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // This needs to match all possible paths
         source: "/:path*",
         headers: [
           {
@@ -60,13 +59,6 @@ const nextConfig: NextConfig = {
             key: "Access-Control-Allow-Credentials",
             value: "true",
           },
-        ],
-      },
-      // Additional headers for OPTIONS requests
-      {
-        source: "/:path*",
-        has: [{ type: "method", key: "OPTIONS" }],
-        headers: [
           {
             key: "Allow",
             value: "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH",
