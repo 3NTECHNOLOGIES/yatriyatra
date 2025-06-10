@@ -32,6 +32,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // This needs to match all possible paths
         source: "/:path*",
         headers: [
           {
@@ -40,16 +41,35 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Access-Control-Allow-Methods",
-            value: "GET, POST, PUT, DELETE, OPTIONS",
+            value: "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH",
           },
           {
             key: "Access-Control-Allow-Headers",
             value:
-              "Content-Type, Authorization, X-Requested-With, X-Request-ID",
+              "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, X-Request-ID",
+          },
+          {
+            key: "Access-Control-Expose-Headers",
+            value: "X-Request-ID",
           },
           {
             key: "Access-Control-Max-Age",
             value: "86400",
+          },
+          {
+            key: "Access-Control-Allow-Credentials",
+            value: "true",
+          },
+        ],
+      },
+      // Additional headers for OPTIONS requests
+      {
+        source: "/:path*",
+        has: [{ type: "method", key: "OPTIONS" }],
+        headers: [
+          {
+            key: "Allow",
+            value: "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH",
           },
         ],
       },

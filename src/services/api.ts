@@ -2,6 +2,7 @@ import axios, {
   InternalAxiosRequestConfig,
   AxiosResponse,
   AxiosError,
+  AxiosHeaders,
 } from "axios";
 import { authService } from "./authService";
 
@@ -25,6 +26,7 @@ const api = axios.create({
         : "https://yatriyatra.com",
   },
   timeout: 30000,
+  withCredentials: true,
 });
 
 // Retry logic helper
@@ -52,22 +54,33 @@ const retryRequest = async (
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
     const token = authService.getAccessToken();
-    if (token && config.headers) {
+
+    // Set up common headers
+    if (!config.headers) {
+      config.headers = new AxiosHeaders();
+    }
+
+    // Add auth token if available
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Add timestamp to prevent caching
+    // Add CORS headers
+    config.headers["X-Requested-With"] = "XMLHttpRequest";
+
+    // Add request ID for tracking
+    const requestId = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+    config.headers["X-Request-ID"] = requestId;
+
+    // Add timestamp to prevent caching for GET requests
     if (config.method?.toLowerCase() === "get") {
       config.params = {
         ...config.params,
         _t: Date.now(),
       };
     }
-
-    // Add request ID for tracking
-    config.headers["X-Request-ID"] = `${Date.now()}-${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
 
     return config;
   },
@@ -97,6 +110,12 @@ api.interceptors.response.use(
 
     // If it's a CORS error or network error, retry with backoff
     if (!error.response || error.message === "Network Error") {
+      // Log detailed information about the CORS error
+      console.error("CORS or Network Error:", {
+        error: error.message,
+        config: error.config,
+        response: error.response,
+      });
       return retryRequest(error);
     }
 
