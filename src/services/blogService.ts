@@ -74,6 +74,32 @@ const cleanBlogContent = (content?: string): string => {
 // Cache for blog data to prevent redundant requests
 const blogCache = new Map<string, { data: BlogPost; timestamp: number }>();
 const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 100; // Maximum number of items to cache
+
+// Helper to clean up old cache entries
+const cleanupCache = () => {
+  const now = Date.now();
+  const entries = Array.from(blogCache.entries());
+
+  // Remove expired entries
+  entries.forEach(([key, value]) => {
+    if (now - value.timestamp > CACHE_EXPIRY) {
+      blogCache.delete(key);
+    }
+  });
+
+  // If still over size limit, remove oldest entries
+  if (blogCache.size > MAX_CACHE_SIZE) {
+    const sortedEntries = entries.sort(
+      (a, b) => a[1].timestamp - b[1].timestamp
+    );
+    const entriesToRemove = sortedEntries.slice(
+      0,
+      blogCache.size - MAX_CACHE_SIZE
+    );
+    entriesToRemove.forEach(([key]) => blogCache.delete(key));
+  }
+};
 
 export const blogService = {
   async getBlogs(filters: BlogFilters = {}): Promise<BlogResponse> {
@@ -90,6 +116,11 @@ export const blogService = {
           .filter(([_, value]) => value !== undefined && value !== "")
           .map(([key, value]) => [key, String(value)])
       );
+
+      // Add cache buster for non-cached requests
+      if (!filters.categoryId && !filters.search) {
+        params.append("_t", Date.now().toString());
+      }
 
       const response = await api.get(`/blogs?${params.toString()}`);
       const formattedResponse = response.data;
@@ -113,6 +144,17 @@ export const blogService = {
             coverImage: blog.coverImage || "",
           })
         );
+
+        // Cache individual blog posts
+        formattedResponse.data.blogs.forEach((blog: BlogPost) => {
+          blogCache.set(blog.id, {
+            data: blog,
+            timestamp: Date.now(),
+          });
+        });
+
+        // Clean up cache periodically
+        cleanupCache();
       } else {
         // If no blogs data, provide empty array with proper structure
         formattedResponse.data = {
@@ -210,6 +252,9 @@ export const blogService = {
           data: blog,
           timestamp: now,
         });
+
+        // Clean up cache periodically
+        cleanupCache();
       }
 
       return data;
@@ -220,7 +265,7 @@ export const blogService = {
         message: error.response?.data?.message || "Failed to fetch blog",
         data: { blog: {} as BlogPost },
       };
-      throw error;
+      throw errorResponse;
     }
   },
 

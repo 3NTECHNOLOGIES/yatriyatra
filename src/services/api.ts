@@ -11,16 +11,42 @@ interface ApiErrorResponse {
 }
 
 const API_BASE_URL = "https://api.yatriyatra.com/api/v1";
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
-    Origin: "https://yatriyatra.com",
+    Origin:
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "https://yatriyatra.com",
   },
   timeout: 30000,
 });
+
+// Retry logic helper
+const retryRequest = async (
+  error: AxiosError,
+  retryCount: number = 0
+): Promise<any> => {
+  const shouldRetry =
+    retryCount < MAX_RETRIES &&
+    (!error.response ||
+      error.response.status >= 500 ||
+      error.message === "Network Error");
+
+  if (shouldRetry) {
+    const delay = RETRY_DELAY * Math.pow(2, retryCount);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    const config = error.config as InternalAxiosRequestConfig;
+    return api(config).catch((err) => retryRequest(err, retryCount + 1));
+  }
+
+  return Promise.reject(error);
+};
 
 // Request interceptor
 api.interceptors.request.use(
@@ -38,6 +64,11 @@ api.interceptors.request.use(
       };
     }
 
+    // Add request ID for tracking
+    config.headers["X-Request-ID"] = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
     return config;
   },
   (error: AxiosError) => {
@@ -53,23 +84,20 @@ api.interceptors.response.use(
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
       authService.clearTokens();
-      window.location.href = "/login";
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
       return Promise.reject(error);
     }
 
-    // If it's a server error (500), add custom message
+    // If it's a server error (500), retry the request
     if (error.response?.status === 500) {
-      const message =
-        error.response.data?.message ||
-        "The server encountered an error. Please try again later.";
-      return Promise.reject(new Error(message));
+      return retryRequest(error);
     }
 
-    // If it's a CORS error, provide more helpful message
-    if (!error.response && error.message === "Network Error") {
-      return Promise.reject(
-        new Error("Unable to connect to the API. Please try again later.")
-      );
+    // If it's a CORS error or network error, retry with backoff
+    if (!error.response || error.message === "Network Error") {
+      return retryRequest(error);
     }
 
     // For other errors, use the server's error message if available

@@ -15,11 +15,17 @@ const nextConfig: NextConfig = {
     domains: ["api.yatriyatra.com"],
   },
   async rewrites() {
-    // Always use rewrites in both development and production
     return [
       {
         source: "/api/v1/:path*",
         destination: "https://api.yatriyatra.com/api/v1/:path*",
+        has: [
+          {
+            type: "header",
+            key: "x-skip-rewrite",
+            value: "(?!true)",
+          },
+        ],
       },
     ];
   },
@@ -30,10 +36,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Access-Control-Allow-Origin",
-            value:
-              process.env.NODE_ENV === "development"
-                ? "http://localhost:3000"
-                : "https://yatriyatra.com",
+            value: "*",
           },
           {
             key: "Access-Control-Allow-Methods",
@@ -41,11 +44,12 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Access-Control-Allow-Headers",
-            value: "Content-Type, Authorization, X-Requested-With",
+            value:
+              "Content-Type, Authorization, X-Requested-With, X-Request-ID",
           },
           {
-            key: "Access-Control-Allow-Credentials",
-            value: "true",
+            key: "Access-Control-Max-Age",
+            value: "86400",
           },
         ],
       },
