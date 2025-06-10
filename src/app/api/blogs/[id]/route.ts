@@ -4,7 +4,7 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://api.yatriyatra.com/api/v1";
 
 export async function GET(
-  request: Request,
+  req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
