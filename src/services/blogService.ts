@@ -1,4 +1,5 @@
 import { authService } from "./authService";
+import { API_BASE_URL } from "../config/api";
 
 export interface BlogCategory {
   id: string;
@@ -57,9 +58,6 @@ export interface BlogFilters {
   categoryId?: string;
   status?: string;
 }
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api.yatriyatra.com/api/v1";
 
 export const blogService = {
   async getBlogs(filters: BlogFilters = {}) {

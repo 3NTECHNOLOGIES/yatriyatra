@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { FaSearch, FaTimes, FaChevronDown } from "react-icons/fa";
-import dynamic from "next/dynamic";
+import { FaSearch, FaTimes } from "react-icons/fa";
 import { BlogPost } from "@/services/blogService";
 import BlogCard from "@/components/BlogCard";
+import { API_BASE_URL } from "@/config/api";
 
 // Types
 interface BlogFilters {
@@ -39,20 +39,6 @@ function useDebounce<T>(value: T, delay: number): T {
   }, [value, delay]);
   return debouncedValue;
 }
-
-// Create a client-only sort dropdown component
-const SortDropdown = dynamic(() => import("@/components/SortDropdown"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-between w-48 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700">
-      <span>Sort: Most Recent</span>
-      <FaChevronDown className="ml-2 h-4 w-4 text-gray-500" />
-    </div>
-  ),
-});
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api.yatriyatra.com/api/v1";
 
 export default function BlogPage() {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
@@ -89,13 +75,16 @@ export default function BlogPage() {
           if (value) queryParams.append(key, String(value));
         });
 
-        const response = await fetch(`/api/blogs?${queryParams.toString()}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          cache: "no-store",
-        });
+        const response = await fetch(
+          `${API_BASE_URL}/blogs?${queryParams.toString()}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            cache: "no-store",
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch blogs");

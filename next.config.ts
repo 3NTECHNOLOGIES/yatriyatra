@@ -2,23 +2,19 @@ import { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: [
-      "api.yatriyatra.com",
-      "yatriyatra.com",
-      "www.yatriyatra.com",
-      "localhost",
-      "127.0.0.1",
-    ],
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "api.yatriyatra.com",
+        pathname: "/api/v1/images/**",
       },
       {
         protocol: "http",
-        hostname: "**",
+        hostname: "api.yatriyatra.com",
+        pathname: "/api/v1/images/**",
       },
     ],
+    unoptimized: true,
   },
   async headers() {
     return [

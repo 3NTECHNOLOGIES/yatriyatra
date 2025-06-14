@@ -44,10 +44,18 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, isFeatured = false }) => {
           <Link href={`/blog/${post.id}`}>
             {post.coverImage ? (
               <div className="relative w-full h-full">
-                <img
+                <Image
                   src={getBlogCoverImage(post.coverImage)}
                   alt={post.title}
-                  className="object-cover w-full h-full transition duration-700 hover:scale-105"
+                  fill
+                  priority={isFeatured}
+                  className="object-cover transition duration-700 hover:scale-105"
+                  sizes={
+                    isFeatured
+                      ? "(max-width: 768px) 100vw, 50vw"
+                      : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  }
+                  unoptimized
                 />
               </div>
             ) : (

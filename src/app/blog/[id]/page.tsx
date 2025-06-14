@@ -16,21 +16,12 @@ import { BlogPost } from "@/services/blogService";
 import ReadingProgressBar from "@/components/ReadingProgressBar";
 import { ShareButton } from "@/components/ShareButton";
 import BlogContentViewer from "@/components/BlogContentViewer";
+import { API_BASE_URL } from "@/config/api";
 
 // Utility functions
 const getBlogCoverImage = (imageUrl?: string): string => {
   if (!imageUrl) return "/images/blog-placeholder.svg";
-
-  try {
-    // If it's already a full URL, return it
-    new URL(imageUrl);
-    return imageUrl;
-  } catch {
-    // If it's a relative path, prepend the API URL
-    const API_URL =
-      process.env.NEXT_PUBLIC_API_URL || "https://api.yatriyatra.com/api/v1";
-    return `${API_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
-  }
+  return imageUrl;
 };
 
 const formatDate = (dateString: string): string =>
@@ -76,12 +67,16 @@ export default function BlogPostPage() {
     const fetchBlogPost = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/blogs/${postId}`, {
+        const response = await fetch(`${API_BASE_URL}/blogs/${postId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
           cache: "no-store",
+          // @ts-ignore
+          agent: new (require("https").Agent)({
+            rejectUnauthorized: false,
+          }),
         });
 
         if (!response.ok) {
@@ -132,14 +127,26 @@ export default function BlogPostPage() {
       <div className="relative h-[50vh] md:h-[60vh] w-full overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
-          <Image
-            src={getBlogCoverImage(post.coverImage)}
-            alt={post.title}
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
+          {post.coverImage ? (
+            <Image
+              src={getBlogCoverImage(post.coverImage)}
+              alt={post.title}
+              fill
+              priority
+              className="object-cover"
+              sizes="100vw"
+              unoptimized
+            />
+          ) : (
+            <Image
+              src="/images/blog-placeholder.svg"
+              alt={post.title}
+              fill
+              priority
+              className="object-cover"
+              sizes="100vw"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
         </div>
 
