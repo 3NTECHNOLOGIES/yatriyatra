@@ -43,7 +43,7 @@ const BlogContentViewer = ({ content }: BlogContentViewerProps) => (
       }
     `}</style>
     <div
-      className="prose max-w-none"
+      className="prose max-w-none text-black"
       dangerouslySetInnerHTML={{ __html: content }}
     />
   </div>

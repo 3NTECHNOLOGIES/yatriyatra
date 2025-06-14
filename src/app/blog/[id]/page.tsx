@@ -157,7 +157,7 @@ export default function BlogPostPage() {
               {post.category.name}
             </span>
             <MetaItem icon={<FaCalendarAlt />}>
-              {formatDate(post.date)}
+              {formatDate(post?.createdAt as string)}
             </MetaItem>
             <MetaItem icon={<FaEye />}>{post.views} views</MetaItem>
             {post.content && (
