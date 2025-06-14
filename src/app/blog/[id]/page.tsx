@@ -18,8 +18,20 @@ import { ShareButton } from "@/components/ShareButton";
 import BlogContentViewer from "@/components/BlogContentViewer";
 
 // Utility functions
-const getBlogCoverImage = (imageUrl?: string): string =>
-  imageUrl || "/images/blog-placeholder.svg";
+const getBlogCoverImage = (imageUrl?: string): string => {
+  if (!imageUrl) return "/images/blog-placeholder.svg";
+
+  try {
+    // If it's already a full URL, return it
+    new URL(imageUrl);
+    return imageUrl;
+  } catch {
+    // If it's a relative path, prepend the API URL
+    const API_URL =
+      process.env.NEXT_PUBLIC_API_URL || "https://api.yatriyatra.com/api/v1";
+    return `${API_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+  }
+};
 
 const formatDate = (dateString: string): string =>
   new Date(dateString).toLocaleDateString("en-US", {
